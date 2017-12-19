@@ -29,4 +29,9 @@ Get dividend information from postings in DART
 >> python dart_dividends.py -m 1 -c S-Oil
 
 ================================================================================
-  
+
+Description of python codes (in Korean)
+
+https://blog.naver.com/jaden-agent/221165184133
+https://blog.naver.com/jaden-agent/221166737850 
+ 

@@ -1,6 +1,5 @@
 #-*- coding:utf-8 -*-
 # Parsing dividends data from DART
-import requests
 import urllib.request
 import urllib.parse
 import xlsxwriter
@@ -86,11 +85,6 @@ def main():
 
 	for i in range(delta.days + 1):
 
-		#l=0
-		#while(l<100000):
-		#	print (l)
-		#	l = l+1	
-
 		d = start_day + timedelta(days=i)
 		rdate = d.strftime('%Y%m%d')
 		print(rdate)
@@ -122,8 +116,11 @@ def main():
 			market_list = []
 			title_list = []
 			reporter_list = []
+			tr_cnt = 0
 			
 			for tr in trs[1:]:
+				tr_cnt = tr_cnt + 1
+				time.sleep(2)
 				tds = tr.findAll('td')
 				link = 'http://dart.fss.or.kr' + tds[2].a['href']
 				date = tds[4].text.strip().replace('.', '-')
@@ -139,7 +136,7 @@ def main():
 				title_list.append(title)
 				reporter_list.append(reporter)
 
-				if (title == "현금ㆍ현물배당결정") or (title=="현금배당결정"):
+				if (title == "현금ㆍ현물배당결정") or (title=="현금배당결정") or (title == "분기ㆍ중간배당결정"):
 					dart_div_sublist = []
 
 					print(corp_name)
@@ -161,39 +158,73 @@ def main():
 
 					dart2 = soup2.find_all(string=re.compile('dart2.dtd'))
 					dart3 = soup2.find_all(string=re.compile('dart3.xsd'))
+					year = int(date[0:4])
 
 					if len(dart3) != 0:
 						link2 = "http://dart.fss.or.kr/report/viewer.do?rcpNo=" + rcpNo + "&dcmNo=" + dcmNo + "&eleId=2&offset=4916&length=3668&dtd=dart3.xsd"
+						#link2 = "http://dart.fss.or.kr/report/viewer.do?rcpNo=" + rcpNo + "&dcmNo=" + dcmNo + "&eleId=0&offset=0&length=0&dtd=dart3.xsd"
+					elif (title == "분기ㆍ중간배당결정"):
+						link2 = "http://dart.fss.or.kr/report/viewer.do?rcpNo=" + rcpNo + "&dcmNo=" + dcmNo + "&eleId=0&offset=0&length=0&dtd=dart2.dtd"
 					elif len(dart2) != 0:
-						link2 = "http://dart.fss.or.kr/report/viewer.do?rcpNo=" + rcpNo + "&dcmNo=" + dcmNo + "&eleId=87&offset=7601&length=4738&dtd=dart2.dtd"
+						if year < 2007:
+							link2 = "http://dart.fss.or.kr/report/viewer.do?rcpNo=" + rcpNo + "&dcmNo=" + dcmNo + "&eleId=0&offset=0&length=0&dtd=dart2.dtd"
+						else:
+							link2 = "http://dart.fss.or.kr/report/viewer.do?rcpNo=" + rcpNo + "&dcmNo=" + dcmNo + "&eleId=87&offset=7601&length=4738&dtd=dart2.dtd"
 					else:
 						link2 = "http://dart.fss.or.kr/report/viewer.do?rcpNo=" + rcpNo + "&dcmNo=" + dcmNo + "&eleId=0&offset=0&length=0&dtd=HTML"  
 					
 					#print(link2)
 
 					try:
-							handle = urllib.request.urlopen(link2)
-							data = handle.read()
-							soup3 = BeautifulSoup(data, 'html.parser', from_encoding='utf-8')
-							#print(soup3)
+						handle = urllib.request.urlopen(link2)
+						#print(handle)
+						data = handle.read()
+						soup3 = BeautifulSoup(data, 'html.parser', from_encoding='utf-8')
+						#print(soup3)
 
+						tables = soup3.findAll("table")
+						
+						if len(tables) == 1 or len(tables) == 2:
 							div_table = soup3.find("table")
-							# [0]   1. 배당구분
-							# [1]   2. 배당종류
-							# [2]   현물자산의 상세내역
-							# [3]   3. 1주당 배당금(원) 보통주식
-							# [4]   3. 1주당 배당금(원) 종류주식
-							# [5]   차등배당 여부
-							# [6]   4. 시가배당율(%) 보통주식 
-							# [7]   4. 시가배당율(%) 종류주식
-							# [8]   5. 배당금총액(원)
-							# [9]   6. 배당기준일
-							# [10]  7. 배당금지급 예정일자
-							# [11]  8. 승인기관
-							# [12]  9 . 주주총회 예정일자
-							# [13]  10. 이사회결의일(결정일)
-							div_trs = div_table.findAll('tr')
-							print(len(div_trs))
+						else:
+							print("Tables", len(tables))
+							#div_table = soup3.findAll("table")[2]
+							div_table = soup3.findAll("table")[-1]
+					
+						# 최신 공시의 포맷
+						# [0]   1. 배당구분
+						# [1]   2. 배당종류
+						# [2]   현물자산의 상세내역
+						# [3]   3. 1주당 배당금(원) 보통주식
+						# [4]   3. 1주당 배당금(원) 종류주식
+						# [5]   차등배당 여부
+						# [6]   4. 시가배당율(%) 보통주식 
+						# [7]   4. 시가배당율(%) 종류주식
+						# [8]   5. 배당금총액(원)
+						# [9]   6. 배당기준일
+						# [10]  7. 배당금지급 예정일자
+						# [11]  8. 승인기관
+						# [12]  9 . 주주총회 예정일자
+						# [13]  10. 이사회결의일(결정일)
+						div_trs = div_table.findAll('tr')
+						#print(len(div_trs))
+						if (title == "분기ㆍ중간배당결정"):
+							if (len(div_trs) == 14) or (len(div_trs) == 15):
+								div_cat = "분기배당"
+								div_type = ""
+								div_normal = div_trs[3].findAll('td')[2].text
+								div_normal2 = div_trs[4].findAll('td')[1].text
+								#div_ratio1 = div_trs[9].findAll('td')[1].text
+								div_ratio1 = "0"
+								div_ratio2 = "0"
+							elif (len(div_trs) == 12):
+								div_cat = "분기배당"
+								div_type = ""
+								div_normal = div_trs[1].findAll('td')[2].text
+								div_normal2 = div_trs[2].findAll('td')[1].text
+								div_ratio1 = "0"
+								div_ratio2 = "0"
+						else:
 							if (len(div_trs) == 20):
 								div_cat = div_trs[0].findAll('td')[1].text
 								#print(div_cat)
@@ -219,6 +250,21 @@ def main():
 								div_normal2 = div_trs[2].findAll('td')[1].text
 								div_ratio1 = div_trs[3].findAll('td')[2].text
 								div_ratio2 = div_trs[4].findAll('td')[1].text
+							elif (len(div_trs) == 24) or (len(div_trs) == 26):
+								if year == 2005 or year == 2006:
+									div_cat = "결산배당"
+									div_type = ""
+									div_normal = div_trs[0].findAll('td')[2].text
+									div_normal2 = div_trs[1].findAll('td')[1].text
+									div_ratio1 = div_trs[2].findAll('td')[2].text
+									div_ratio2 = div_trs[3].findAll('td')[1].text
+								else:
+									div_cat = "결산배당"
+									div_type = ""
+									div_normal = div_trs[3].findAll('td')[2].text
+									div_normal2 = div_trs[4].findAll('td')[1].text
+									div_ratio1 = div_trs[7].findAll('td')[2].text
+									div_ratio2 = div_trs[8].findAll('td')[1].text
 							else:
 								div_cat = "PARSING ERROR"
 								div_type = ""
