@@ -2,6 +2,7 @@
 # Parsing dividends data from DART
 import requests
 import urllib.request
+import urllib.parse
 import xlsxwriter
 import os
 import time
@@ -9,13 +10,14 @@ import sys
 import getopt
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
+import re
 
 def main():
 
 	# Default
 	config_mode = 0
 	config_start_year	= 2017
-	config_start_month	= 11
+	config_start_month	= 12
 	config_start_day	= 15
 	config_end_year		= 2017
 	config_end_month	= 12
@@ -50,23 +52,24 @@ def main():
 					"""
 			print(help_msg)
 			sys.exit(2)
-		elif option == "--mode" or option == "-d":
+		elif option == "--mode" or option == "-m":
 			config_mode = int(argument)
 		elif option == "--start" or option == "-s":
-			print(argument)
-			config_start_year	= int(argument[0:3])
-			config_start_month	= int(argument[4:5])
-			config_start_day	= int(argument[6:7])
+			config_start_year	= int(argument[0:4])
+			config_start_month	= int(argument[4:6])
+			config_start_day	= int(argument[6:8])
 		elif option == "--end" or option == "-e":
-			config_end_year		= int(argument[0:3])
-			config_end_month	= int(argument[4:5])
-			config_end_day		= int(argument[6:7])
+			config_end_year		= int(argument[0:4])
+			config_end_month	= int(argument[4:6])
+			config_end_day		= int(argument[6:8])
 		elif option == "--corp" or option == "-c":
 			corp = argument
 		elif option == "--output" or option == "-o":
 			workbook_name = argument + ".xlsx"
 
+	# URL for Mode 0
 	url_templete_0 = "http://dart.fss.or.kr/dsab002/search.ax?reportName=%s&&maxResults=100&&startDate=%s&&endDate=%s"
+	# URL for Mode 1
 	url_templete_1 = "http://dart.fss.or.kr/dsab002/search.ax?reportName=%s&&maxResults=100&&textCrpNm=%s"
 	headers = {'Cookie':'DSAB002_MAXRESULTS=5000;'}
 	
@@ -77,20 +80,16 @@ def main():
 	start_day = datetime(config_start_year, config_start_month, config_start_day)
 	end_day = datetime(config_end_year, config_end_month, config_end_day)
 	delta = end_day - start_day
-	#print(start_day)
-	#print(end_day)
 
 	# 배당
 	report = "%EB%B0%B0%EB%8B%B9"
 
 	for i in range(delta.days + 1):
 
-		# Delay operation
-		l=0
-		while(l<100000):
-			print (l)
-			l = l+1	
-		#time.sleep(20)
+		#l=0
+		#while(l<100000):
+		#	print (l)
+		#	l = l+1	
 
 		d = start_day + timedelta(days=i)
 		rdate = d.strftime('%Y%m%d')
@@ -100,7 +99,8 @@ def main():
 			handle = urllib.request.urlopen(url_templete_0 % (report, rdate, rdate))
 		# config mode 1
 		else:
-			handle = urllib.request.urlopen(url_templete_1 % (report, corp))
+			handle = urllib.request.urlopen(url_templete_1 % (report, urllib.parse.quote(corp)))
+			print("URL" + url_templete_1 % (report, corp))
 
 		data = handle.read()
 		soup = BeautifulSoup(data, 'html.parser', from_encoding='utf-8')
@@ -112,6 +112,9 @@ def main():
 
 		#if counts > 0:
 		if counts > 2:
+			# Delay operation
+			time.sleep(20)
+		
 			link_list = []
 			docid_list = []
 			date_list = []
@@ -136,15 +139,17 @@ def main():
 				title_list.append(title)
 				reporter_list.append(reporter)
 
-				if (title == "현금ㆍ현물배당결정"):
+				if (title == "현금ㆍ현물배당결정") or (title=="현금배당결정"):
 					dart_div_sublist = []
 
 					print(corp_name)
-					#print(title)
+					print(title)
+					print(date)
 					handle = urllib.request.urlopen(link)
 					#print(link)
 					data = handle.read()
 					soup2 = BeautifulSoup(data, 'html.parser', from_encoding='utf-8')
+					#print(soup2)
 
 					test = soup2.find('a', {'href' : '#download'})['onclick']
 					words = test.split("'")
@@ -154,39 +159,81 @@ def main():
 					#print(rcpNo)
 					#print(dcmNo)
 
-					link2 = "http://dart.fss.or.kr/report/viewer.do?rcpNo=" + rcpNo + "&dcmNo=" + dcmNo + "&eleId=0&offset=0&length=0&dtd=HTML"
-					#print(link2)
-					handle = urllib.request.urlopen(link2)
-					data = handle.read()
-					soup3 = BeautifulSoup(data, 'html.parser', from_encoding='utf-8')
-					#print(soup3)
+					dart2 = soup2.find_all(string=re.compile('dart2.dtd'))
+					dart3 = soup2.find_all(string=re.compile('dart3.xsd'))
 
-					div_table = soup3.find("table")
-					# [0]   1. 배당구분
-					# [1]   2. 배당종류
-					# [2]   현물자산의 상세내역
-					# [3]   3. 1주당 배당금(원) 보통주식
-					# [4]   3. 1주당 배당금(원) 종류주식
-					# [5]   차등배당 여부
-					# [6]   4. 시가배당율(%) 보통주식 
-					# [7]   4. 시가배당율(%) 종류주식
-					# [8]   5. 배당금총액(원)
-					# [9]   6. 배당기준일
-					# [10]  7. 배당금지급 예정일자
-					# [11]  8. 승인기관
-					# [12]  9 . 주주총회 예정일자
-					# [13]  10. 이사회결의일(결정일)
-					div_trs = div_table.findAll('tr')
-					div_cat = div_trs[0].findAll('td')[1].text
-					#print(div_cat)
-					div_type = div_trs[1].findAll('td')[1].text
-					#print(div_type)
-					div_normal = div_trs[3].findAll('td')[2].text
-					#print(div_normal)
-					div_normal2 = div_trs[4].findAll('td')[1].text
-					#print(div_normal2)
-					div_ratio1 = div_trs[6].findAll('td')[2].text
-					div_ratio2 = div_trs[7].findAll('td')[1].text
+					if len(dart3) != 0:
+						link2 = "http://dart.fss.or.kr/report/viewer.do?rcpNo=" + rcpNo + "&dcmNo=" + dcmNo + "&eleId=2&offset=4916&length=3668&dtd=dart3.xsd"
+					elif len(dart2) != 0:
+						link2 = "http://dart.fss.or.kr/report/viewer.do?rcpNo=" + rcpNo + "&dcmNo=" + dcmNo + "&eleId=87&offset=7601&length=4738&dtd=dart2.dtd"
+					else:
+						link2 = "http://dart.fss.or.kr/report/viewer.do?rcpNo=" + rcpNo + "&dcmNo=" + dcmNo + "&eleId=0&offset=0&length=0&dtd=HTML"  
+					
+					#print(link2)
+
+					try:
+							handle = urllib.request.urlopen(link2)
+							data = handle.read()
+							soup3 = BeautifulSoup(data, 'html.parser', from_encoding='utf-8')
+							#print(soup3)
+
+							div_table = soup3.find("table")
+							# [0]   1. 배당구분
+							# [1]   2. 배당종류
+							# [2]   현물자산의 상세내역
+							# [3]   3. 1주당 배당금(원) 보통주식
+							# [4]   3. 1주당 배당금(원) 종류주식
+							# [5]   차등배당 여부
+							# [6]   4. 시가배당율(%) 보통주식 
+							# [7]   4. 시가배당율(%) 종류주식
+							# [8]   5. 배당금총액(원)
+							# [9]   6. 배당기준일
+							# [10]  7. 배당금지급 예정일자
+							# [11]  8. 승인기관
+							# [12]  9 . 주주총회 예정일자
+							# [13]  10. 이사회결의일(결정일)
+							div_trs = div_table.findAll('tr')
+							print(len(div_trs))
+							if (len(div_trs) == 20):
+								div_cat = div_trs[0].findAll('td')[1].text
+								#print(div_cat)
+								div_type = div_trs[1].findAll('td')[1].text
+								#print(div_type)
+								div_normal = div_trs[3].findAll('td')[2].text
+								#print(div_normal)
+								div_normal2 = div_trs[4].findAll('td')[1].text
+								#print(div_normal2)
+								div_ratio1 = div_trs[6].findAll('td')[2].text
+								div_ratio2 = div_trs[7].findAll('td')[1].text
+							elif (len(div_trs) == 18) or (len(div_trs) == 17):
+								div_cat = div_trs[0].findAll('td')[1].text
+								div_type = div_trs[1].findAll('td')[1].text
+								div_normal = div_trs[3].findAll('td')[2].text
+								div_normal2 = div_trs[4].findAll('td')[1].text
+								div_ratio1 = div_trs[5].findAll('td')[2].text
+								div_ratio2 = div_trs[6].findAll('td')[1].text
+							elif (len(div_trs) == 14) or (len(div_trs) == 13):
+								div_cat = div_trs[0].findAll('td')[1].text
+								div_type = ""
+								div_normal = div_trs[1].findAll('td')[2].text
+								div_normal2 = div_trs[2].findAll('td')[1].text
+								div_ratio1 = div_trs[3].findAll('td')[2].text
+								div_ratio2 = div_trs[4].findAll('td')[1].text
+							else:
+								div_cat = "PARSING ERROR"
+								div_type = ""
+								div_normal = "0"
+								div_normal2 = "0"
+								div_ratio1 = "0"
+								div_ratio2 = "0"
+					except:
+						print ("URL ERROR")
+						div_cat = "URL ERROR"
+						div_type = ""
+						div_normal = "0"
+						div_normal2 = "0"
+						div_ratio1 = "0"
+						div_ratio2 = "0"
 				
 					dart_div_sublist.append(date)
 					dart_div_sublist.append(corp_name)
