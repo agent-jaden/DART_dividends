@@ -33,5 +33,6 @@ Get dividend information from postings in DART
 Description of python codes (in Korean)
 
 https://blog.naver.com/jaden-agent/221165184133
+
 https://blog.naver.com/jaden-agent/221166737850 
  
