@@ -1,5 +1,7 @@
 # DART_dividends
 
+* dart_dividends.py
+
 Get dividend information from postings in DART
 
 ================================================================================
@@ -35,4 +37,18 @@ Description of python codes (in Korean)
 https://blog.naver.com/jaden-agent/221165184133
 
 https://blog.naver.com/jaden-agent/221166737850 
+ 
+* div_crawler.py
+
+Crawling information of dividends from itooza. (www.itooza.com)
+Write information to Excel file.
+
+* Basic_20171221.xlsx
+
+Stock lists (KRX and KOSDAQ) for div_crawler.py
+
+* div_crawling_result.xlsx
+
+Example of output result
+
  
