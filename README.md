@@ -49,6 +49,16 @@ Stock lists (KRX and KOSDAQ) for div_crawler.py
 
 * div_crawling_result.xlsx
 
-Example of output result
+Example of output result created by div_crawler.py
 
+* update_div.py
+
+Read recent dividends from Excel file of DART posting and write new excel file.
+
+* DART_dividends.xlsx
+
+Example of DART postings created by dart_dividends.py
+
+* update_dps_result.py
  
+Example of DPS result created by update_div.py
