@@ -52,17 +52,50 @@ def main():
 		stock_url_list.append(sheet1.cell(i+1,3).value)
 
 		stock_dps_sub_list = []
-		stock_dps_sub_list.append(sheet1.cell(i+1,4).value)
-		stock_dps_sub_list.append(sheet1.cell(i+1,5).value)
-		stock_dps_sub_list.append(sheet1.cell(i+1,6).value)
-		stock_dps_sub_list.append(sheet1.cell(i+1,7).value)
-		stock_dps_sub_list.append(sheet1.cell(i+1,8).value)
-		stock_dps_sub_list.append(sheet1.cell(i+1,9).value)
-		stock_dps_sub_list.append(sheet1.cell(i+1,10).value)
-		stock_dps_sub_list.append(sheet1.cell(i+1,11).value)
-		stock_dps_sub_list.append(sheet1.cell(i+1,12).value)
-		stock_dps_sub_list.append(sheet1.cell(i+1,13).value)
-		stock_dps_sub_list.append(sheet1.cell(i+1,14).value)
+		if sheet1.cell(i+1,4).value == 'N/A':
+			stock_dps_sub_list.append(0.0)
+		else:
+			stock_dps_sub_list.append(float(sheet1.cell(i+1,4).value.replace(',','')))
+		if sheet1.cell(i+1,5).value == 'N/A':
+			stock_dps_sub_list.append(0.0)
+		else:
+			stock_dps_sub_list.append(float(sheet1.cell(i+1,5).value.replace(',','')))
+		if sheet1.cell(i+1,6).value == 'N/A':
+			stock_dps_sub_list.append(0.0)
+		else:
+			stock_dps_sub_list.append(float(sheet1.cell(i+1,6).value.replace(',','')))
+		if sheet1.cell(i+1,7).value == 'N/A':
+			stock_dps_sub_list.append(0.0)
+		else:
+			stock_dps_sub_list.append(float(sheet1.cell(i+1,7).value.replace(',','')))
+		if sheet1.cell(i+1,8).value == 'N/A':
+			stock_dps_sub_list.append(0.0)
+		else:
+			stock_dps_sub_list.append(float(sheet1.cell(i+1,8).value.replace(',','')))
+		if sheet1.cell(i+1,9).value == 'N/A':
+			stock_dps_sub_list.append(0.0)
+		else:
+			stock_dps_sub_list.append(float(sheet1.cell(i+1,9).value.replace(',','')))
+		if sheet1.cell(i+1,10).value == 'N/A':
+			stock_dps_sub_list.append(0.0)
+		else:
+			stock_dps_sub_list.append(float(sheet1.cell(i+1,10).value.replace(',','')))
+		if sheet1.cell(i+1,11).value == 'N/A':
+			stock_dps_sub_list.append(0.0)
+		else:
+			stock_dps_sub_list.append(float(sheet1.cell(i+1,11).value.replace(',','')))
+		if sheet1.cell(i+1,12).value == 'N/A':
+			stock_dps_sub_list.append(0.0)
+		else:
+			stock_dps_sub_list.append(float(sheet1.cell(i+1,12).value.replace(',','')))
+		if sheet1.cell(i+1,13).value == 'N/A':
+			stock_dps_sub_list.append(0.0)
+		else:
+			stock_dps_sub_list.append(float(sheet1.cell(i+1,13).value.replace(',','')))
+		if sheet1.cell(i+1,14).value == 'N/A':
+			stock_dps_sub_list.append(0.0)
+		else:
+			stock_dps_sub_list.append(float(sheet1.cell(i+1,14).value.replace(',','')))
 		# New dps
 		stock_dps_sub_list.append(0.0)
 		stock_dps_list.append(stock_dps_sub_list)
@@ -85,7 +118,8 @@ def main():
 			try:
 				find_index = stock_name_list.index(sheet1.cell(i+1,1).value.strip())
 				if find_index != -1:
-					stock_dps_list[find_index][11] = stock_dps_list[find_index][11] + float(sheet1.cell(i+1,7).value.strip().replace(",",""))
+					#stock_dps_list[find_index][11] = stock_dps_list[find_index][11] + float(sheet1.cell(i+1,7).value.strip().replace(",",""))
+					stock_dps_list[find_index][11] = float(sheet1.cell(i+1,7).value.strip().replace(",",""))
 			except:
 				name_error_list.append(sheet1.cell(i+1,1).value)
 		

@@ -121,7 +121,7 @@ def main():
 			
 			for tr in trs[1:]:
 				tr_cnt = tr_cnt + 1
-				time.sleep(2)
+				time.sleep(1)
 				tds = tr.findAll('td')
 				link = 'http://dart.fss.or.kr' + tds[2].a['href']
 				date = tds[4].text.strip().replace('.', '-')
@@ -136,8 +136,10 @@ def main():
 				market_list.append(market)
 				title_list.append(title)
 				reporter_list.append(reporter)
+				#print(corp_name)
+				#print(title)
 
-				if ((title == "현금ㆍ현물배당결정") or (title=="현금배당결정") or (title == "분기ㆍ중간배당결정")) and (market != "코넥스시장"):
+				if ((title == "[기재정정]현금ㆍ현물배당결정") or (title == "현금ㆍ현물배당결정") or (title=="현금배당결정") or (title == "분기ㆍ중간배당결정")) and (market != "코넥스시장"):
 					dart_div_sublist = []
 
 					print(corp_name)
