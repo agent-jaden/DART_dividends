@@ -98,6 +98,8 @@ def main():
 			stock_dps_sub_list.append(float(sheet1.cell(i+1,14).value.replace(',','')))
 		# New dps
 		stock_dps_sub_list.append(0.0)
+		# temp dps
+		stock_dps_sub_list.append(0.0)
 		stock_dps_list.append(stock_dps_sub_list)
 
 	#print(stock_name_list)
@@ -114,12 +116,34 @@ def main():
 	
 		#print(sheet1.cell(i+1,1).value)
 		#배당구분 = 결산배당 & 배당종류 = 현금배당
-		if ((sheet1.cell(i,5).value.strip() == "결산배당") or (sheet1.cell(i,5).value.strip() == "중간배당") or (sheet1.cell(i,5).value.strip() == "분기배당")) and (sheet1.cell(i,6).value.strip() == "현금배당"):
+		if ((sheet1.cell(i+1,5).value.strip() == "중간배당") or (sheet1.cell(i+1,5).value.strip() == "분기배당")) and (sheet1.cell(i+1,6).value.strip() == "현금배당"):
 			try:
 				find_index = stock_name_list.index(sheet1.cell(i+1,1).value.strip())
 				if find_index != -1:
-					#stock_dps_list[find_index][11] = stock_dps_list[find_index][11] + float(sheet1.cell(i+1,7).value.strip().replace(",",""))
-					stock_dps_list[find_index][11] = float(sheet1.cell(i+1,7).value.strip().replace(",",""))
+					if (sheet1.cell(i+1,3).value =="[기재정정]현금ㆍ현물배당결정"):
+						print("기재정정")
+						print(stock_dps_list[find_index][12])
+						print(sheet1.cell(i+1,1).value.strip())
+						stock_dps_list[find_index][11] = stock_dps_list[find_index][11] + float(sheet1.cell(i+1,7).value.strip().replace(",","")) - stock_dps_list[find_index][12]
+						stock_dps_list[find_index][12] = float(sheet1.cell(i+1,7).value.strip().replace(",",""))
+					else:
+						stock_dps_list[find_index][11] = stock_dps_list[find_index][11] + float(sheet1.cell(i+1,7).value.strip().replace(",",""))
+						stock_dps_list[find_index][12] = float(sheet1.cell(i+1,7).value.strip().replace(",",""))
+			except:
+				name_error_list.append(sheet1.cell(i+1,1).value)
+		elif ((sheet1.cell(i+1,5).value.strip() == "결산배당")) and (sheet1.cell(i+1,6).value.strip() == "현금배당"):
+			try:
+				find_index = stock_name_list.index(sheet1.cell(i+1,1).value.strip())
+				if find_index != -1:
+					if (sheet1.cell(i+1,3).value =="[기재정정]현금ㆍ현물배당결정"):
+						print("기재정정")
+						print(stock_dps_list[find_index][12])
+						print(sheet1.cell(i+1,1).value.strip())
+						stock_dps_list[find_index][11] = stock_dps_list[find_index][11] + float(sheet1.cell(i+1,7).value.strip().replace(",","")) - stock_dps_list[find_index][12]
+						stock_dps_list[find_index][12] = float(sheet1.cell(i+1,7).value.strip().replace(",",""))
+					else:
+						stock_dps_list[find_index][11] = stock_dps_list[find_index][11] + float(sheet1.cell(i+1,7).value.strip().replace(",",""))
+						stock_dps_list[find_index][12] = float(sheet1.cell(i+1,7).value.strip().replace(",",""))
 			except:
 				name_error_list.append(sheet1.cell(i+1,1).value)
 		
@@ -162,7 +186,7 @@ def main():
 		worksheet_dps.write(1+k, 1, stock_name_list[k])
 		worksheet_dps.write(1+k, 2, stock_num_list[k])
 		worksheet_dps.write(1+k, 3, stock_url_list[k])
-		for l in range(len(stock_dps_list[k])):
+		for l in range(len(stock_dps_list[k])-1):
 			worksheet_dps.write(1+k, 4+l, stock_dps_list[k][l])
 
 	workbook.close()
