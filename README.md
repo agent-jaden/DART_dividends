@@ -1,6 +1,6 @@
 # DART_dividends
 
-* dart_dividends.py
+* __dart_dividends.py__
 
 Get dividend information from postings in DART
 
@@ -38,7 +38,7 @@ https://blog.naver.com/jaden-agent/221165184133
 
 https://blog.naver.com/jaden-agent/221166737850 
  
-* div_crawler.py
+* __div_crawler.py__
 
 Crawling information of dividends from itooza. (www.itooza.com)
 Write information to Excel file.
@@ -49,6 +49,18 @@ Stock lists (KRX and KOSDAQ) for div_crawler.py
 
 * div_crawling_result.xlsx
 
-Example of output result
+Example of output result created by div_crawler.py
 
+* __update_div.py__
+
+Read recent dividends from Excel file of DART posting.
+Read dps of 10 years from Excel file.
+Write new excel file for updating recent DPS.
+
+* DART_dividends.xlsx
+
+Example of DART postings created by dart_dividends.py
+
+* __update_dps_result.py__
  
+Example of DPS result created by update_div.py
