@@ -61,6 +61,6 @@ Write new excel file for updating recent DPS.
 
 Example of DART postings created by dart_dividends.py
 
-* __update_dps_result.py__
+* __update_dps_result.xlsx__
  
 Example of DPS result created by update_div.py
