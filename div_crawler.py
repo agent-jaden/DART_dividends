@@ -30,9 +30,9 @@ def main():
 			input_mode = int(argument)
 
 	### PART I - Read Excel file for stock lists
-	num_stock = 2040
+	num_stock = 2046
 	#num_stock = 100
-	input_file = "basic_20171221.xlsx"
+	input_file = "basic_20180309.xlsx"
 	cur_dir = os.getcwd()
 	workbook_name = input_file
 	
